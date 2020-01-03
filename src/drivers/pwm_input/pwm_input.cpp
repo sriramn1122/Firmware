@@ -82,9 +82,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <px4_arch/io_timer.h>
 
 /* Reset pin define */
-#define GPIO_VDD_RANGEFINDER_EN GPIO_GPIO5_OUTPUT
+static_assert(DIRECT_PWM_OUTPUT_CHANNELS >= 6, "GPIO_VDD_RANGEFINDER_EN uses pin 6");
+#define GPIO_VDD_RANGEFINDER_EN_CHAN 5
 
 #if HRT_TIMER == PWMIN_TIMER
 #error cannot share timer between HRT and PWMIN
@@ -272,7 +274,7 @@ void PWMIN::_timer_init(void)
 
 	// XXX refactor this out of this driver
 	/* configure reset pin */
-	px4_arch_configgpio(GPIO_VDD_RANGEFINDER_EN);
+	px4_arch_configgpio(io_timer_channel_get_gpio_output(GPIO_VDD_RANGEFINDER_EN_CHAN));
 
 	/* claim our interrupt vector */
 	irq_attach(PWMIN_TIMER_VECTOR, pwmin_tim_isr, NULL);
@@ -336,14 +338,14 @@ PWMIN::_freeze_test()
 void
 PWMIN::_turn_on()
 {
-	px4_arch_gpiowrite(GPIO_VDD_RANGEFINDER_EN, 1);
+	px4_arch_gpiowrite(io_timer_channel_get_gpio_output(GPIO_VDD_RANGEFINDER_EN_CHAN), 1);
 }
 
 // XXX refactor this out of this driver
 void
 PWMIN::_turn_off()
 {
-	px4_arch_gpiowrite(GPIO_VDD_RANGEFINDER_EN, 0);
+	px4_arch_gpiowrite(io_timer_channel_get_gpio_output(GPIO_VDD_RANGEFINDER_EN_CHAN), 0);
 }
 
 // XXX refactor this out of this driver

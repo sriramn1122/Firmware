@@ -373,7 +373,7 @@ void ICM20602::Run()
 	int accel_samples = 0;
 	int16_t temperature[samples] {};
 
-	for (int i = 0; i < samples; i++) {
+	for (int i = 0; i < math::min(samples, 8); i++) {
 		const FIFO::DATA &fifo_sample = report->f[i];
 
 		// accel data is doubled
